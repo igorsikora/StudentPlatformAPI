@@ -1,7 +1,7 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations.Schema;
+using StudentPlatformAPI.Models.Auth;
 
-namespace StudentPlatformAPI.models
+namespace StudentPlatformAPI.Models
 {
     public class CalendarEvent
     {
@@ -11,7 +11,12 @@ namespace StudentPlatformAPI.models
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
 
-        public int StudentId { get; set; }
-        public Student Student { get; set; }
+        public Guid UserId { get; set; }
+        public User User { get; set; }
+
+        public void SetUserId(Guid userId)
+        {
+            UserId = userId;
+        }
     }
 }

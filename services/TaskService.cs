@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
-using StudentPlatformAPI.data;
-using StudentPlatformAPI.dto;
-using StudentPlatformAPI.models;
+using StudentPlatformAPI.Data;
+using StudentPlatformAPI.Dto;
+using StudentPlatformAPI.Models;
 
-namespace StudentPlatformAPI.services
+namespace StudentPlatformAPI.Services
 {
     public class TaskService : ITaskService
     {
@@ -17,36 +18,36 @@ namespace StudentPlatformAPI.services
             _mapper = mapper;
         }
 
-        public IEnumerable<TaskDto> getTasks(int statusId)
+        public IEnumerable<TaskDto> getTasks(int statusId, Guid userId)
         {
-            return _context.Tasks.Where(t => t.StatusId == statusId).Select(t => new TaskDto()
+            return _context.Tasks.Where(t => t.StatusId == statusId && t.UserId == userId).Select(t => new TaskDto()
             {
                 StatusId = t.StatusId,
-                StudentId = t.StudentId,
                 Id = t.Id,
                 Title = t.Title
             }).ToList();
         }
 
-        public void updateTask(TaskDto dto)
+        public void updateTask(TaskDto dto, Guid userId)
         {
-            var task = _context.Tasks.FirstOrDefault(t => t.Id == dto.Id);
+            var task = _context.Tasks.FirstOrDefault(t => t.Id == dto.Id && t.UserId == userId);
             task.StatusId = dto.StatusId;
             task.Title = dto.Title;
 
             _context.SaveChanges();
         }
 
-        public void createTask(TaskDto dto)
+        public void createTask(TaskDto dto, Guid userId)
         {
             Task task = _mapper.Map<Task>(dto);
+            task.SetUserId(userId);
             _context.Tasks.Add(task);
             _context.SaveChanges();
         }
 
-        public void deleteTask(int id)
+        public void deleteTask(int id, Guid userId)
         {
-            var task = _context.Tasks.FirstOrDefault(t => t.Id == id);
+            var task = _context.Tasks.FirstOrDefault(t => t.Id == id && t.UserId == userId);
 
             if (task != null)
             {
@@ -56,11 +57,11 @@ namespace StudentPlatformAPI.services
             }
         }
 
-        public void deleteTasks(List<TaskDto> tasks)
+        public void deleteTasks(List<TaskDto> tasks, Guid userId)
         {
             foreach (var task in tasks)
             {
-                var taskInDb = _context.Tasks.FirstOrDefault(t => t.Id == task.Id);
+                var taskInDb = _context.Tasks.FirstOrDefault(t => t.Id == task.Id && t.UserId == userId);
 
                 if (taskInDb != null)
                 {

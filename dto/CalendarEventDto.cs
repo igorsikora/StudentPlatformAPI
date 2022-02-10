@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace StudentPlatformAPI.dto
+namespace StudentPlatformAPI.Dto
 {
     public class CalendarEventDto
     {
@@ -9,8 +9,6 @@ namespace StudentPlatformAPI.dto
         public string Description { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-
-        public int StudentId { get; set; }
 
     }
 }

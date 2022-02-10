@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using StudentPlatformAPI.Data;
 
 namespace StudentPlatformAPI.Migrations
 {
     [DbContext(typeof(StudentPlatformContext))]
-    partial class StudentPlatformContextModelSnapshot : ModelSnapshot
+    [Migration("20220209091231_AddedIdentity")]
+    partial class AddedIdentity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -120,7 +122,7 @@ namespace StudentPlatformAPI.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
-            modelBuilder.Entity("StudentPlatformAPI.Models.Auth.Role", b =>
+            modelBuilder.Entity("StudentPlatformAPI.models.Auth.Role", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -148,7 +150,7 @@ namespace StudentPlatformAPI.Migrations
                     b.ToTable("AspNetRoles");
                 });
 
-            modelBuilder.Entity("StudentPlatformAPI.Models.Auth.User", b =>
+            modelBuilder.Entity("StudentPlatformAPI.models.Auth.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -220,7 +222,7 @@ namespace StudentPlatformAPI.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
-            modelBuilder.Entity("StudentPlatformAPI.Models.CalendarEvent", b =>
+            modelBuilder.Entity("StudentPlatformAPI.models.CalendarEvent", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -236,20 +238,71 @@ namespace StudentPlatformAPI.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("StudentId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("StudentId");
 
                     b.ToTable("CalendarEvent");
                 });
 
-            modelBuilder.Entity("StudentPlatformAPI.Models.Task", b =>
+            modelBuilder.Entity("StudentPlatformAPI.models.Status", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Statuses");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 0,
+                            Name = "ToDo"
+                        },
+                        new
+                        {
+                            Id = 1,
+                            Name = "InProgress"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Done"
+                        });
+                });
+
+            modelBuilder.Entity("StudentPlatformAPI.models.Student", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FirstName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Student");
+                });
+
+            modelBuilder.Entity("StudentPlatformAPI.models.Task", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -259,22 +312,22 @@ namespace StudentPlatformAPI.Migrations
                     b.Property<int>("StatusId")
                         .HasColumnType("int");
 
+                    b.Property<int>("StudentId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("StudentId");
 
                     b.ToTable("Task");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
-                    b.HasOne("StudentPlatformAPI.Models.Auth.Role", null)
+                    b.HasOne("StudentPlatformAPI.models.Auth.Role", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -283,7 +336,7 @@ namespace StudentPlatformAPI.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
                 {
-                    b.HasOne("StudentPlatformAPI.Models.Auth.User", null)
+                    b.HasOne("StudentPlatformAPI.models.Auth.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -292,7 +345,7 @@ namespace StudentPlatformAPI.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
                 {
-                    b.HasOne("StudentPlatformAPI.Models.Auth.User", null)
+                    b.HasOne("StudentPlatformAPI.models.Auth.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -301,13 +354,13 @@ namespace StudentPlatformAPI.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
                 {
-                    b.HasOne("StudentPlatformAPI.Models.Auth.Role", null)
+                    b.HasOne("StudentPlatformAPI.models.Auth.Role", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("StudentPlatformAPI.Models.Auth.User", null)
+                    b.HasOne("StudentPlatformAPI.models.Auth.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -316,36 +369,36 @@ namespace StudentPlatformAPI.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
                 {
-                    b.HasOne("StudentPlatformAPI.Models.Auth.User", null)
+                    b.HasOne("StudentPlatformAPI.models.Auth.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("StudentPlatformAPI.Models.CalendarEvent", b =>
+            modelBuilder.Entity("StudentPlatformAPI.models.CalendarEvent", b =>
                 {
-                    b.HasOne("StudentPlatformAPI.Models.Auth.User", "User")
+                    b.HasOne("StudentPlatformAPI.models.Student", "Student")
                         .WithMany("CalendarEvents")
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.Navigation("Student");
                 });
 
-            modelBuilder.Entity("StudentPlatformAPI.Models.Task", b =>
+            modelBuilder.Entity("StudentPlatformAPI.models.Task", b =>
                 {
-                    b.HasOne("StudentPlatformAPI.Models.Auth.User", "User")
+                    b.HasOne("StudentPlatformAPI.models.Student", "Student")
                         .WithMany("Tasks")
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.Navigation("Student");
                 });
 
-            modelBuilder.Entity("StudentPlatformAPI.Models.Auth.User", b =>
+            modelBuilder.Entity("StudentPlatformAPI.models.Student", b =>
                 {
                     b.Navigation("CalendarEvents");
 

@@ -1,39 +1,57 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using StudentPlatformAPI.dto;
-using StudentPlatformAPI.services;
+using System.Linq;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using StudentPlatformAPI.Dto;
+using StudentPlatformAPI.Services;
 
 namespace StudentPlatformAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class CalendarEventsController : ControllerBase
     {
-        private ICalendarEventService _service;
+        private readonly ICalendarEventService _service;
+
         public CalendarEventsController(ICalendarEventService service)
         {
             _service = service;
         }
 
 
-        [Route("monthlyEvents/{studentId}")]
+        [Route("MonthlyEvents")]
         [HttpGet]
-        public IActionResult GetMonthlyEvents(int studentId, DateTime date)
+        public IActionResult GetMonthlyEvents(DateTime date)
         {
-            return Ok(_service.getMonthlyCalendarEvents(date, studentId));
+            try
+            {
+                var userId = new Guid(User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)?.Value!);
+                return Ok(_service.getMonthlyCalendarEvents(date, userId));
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
         }
 
-        [Route("weeklyEvents/{studentId}")]
+        [Route("WeeklyEvents")]
         [HttpGet]
-        public IActionResult GetWeeklyCalendarEvents(int studentId, [FromQuery] IEnumerable<DateTime> day)
+        public IActionResult GetWeeklyCalendarEvents([FromQuery] IEnumerable<DateTime> day)
         {
-            return Ok(_service.getWeeklyCalendarEvents(day, studentId));
+            try
+            {
+                var userId = new Guid(User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)?.Value!);
+                return Ok(_service.getWeeklyCalendarEvents(day, userId));
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
         }
 
-
-
-        
 
         // POST api/<CalendarEventsController>
         [HttpPost]
@@ -41,9 +59,10 @@ namespace StudentPlatformAPI.Controllers
         {
             try
             {
-                return Created("", _service.createCalendarEvent(dto));
+                var userId = new Guid(User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)?.Value!);
+                return Created("", _service.createCalendarEvent(dto, userId));
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 return BadRequest(e);
             }
@@ -51,14 +70,15 @@ namespace StudentPlatformAPI.Controllers
 
         // PUT api/<CalendarEventsController>/5
         [HttpPut]
-        public IActionResult Put([FromBody]CalendarEventDto dto)
+        public IActionResult Put([FromBody] CalendarEventDto dto)
         {
             try
             {
-                _service.updateCalendarEvent(dto);
+                var userId = new Guid(User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)?.Value!);
+                _service.updateCalendarEvent(dto, userId);
                 return NoContent();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 return BadRequest(e);
             }
@@ -70,10 +90,11 @@ namespace StudentPlatformAPI.Controllers
         {
             try
             {
-                _service.deleteCalendarEvent(id);
+                var userId = new Guid(User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)?.Value!);
+                _service.deleteCalendarEvent(id, userId);
                 return NoContent();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 return BadRequest(e);
             }

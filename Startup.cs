@@ -1,21 +1,22 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Text;
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using StudentPlatformAPI.data;
-using StudentPlatformAPI.map;
-using StudentPlatformAPI.services;
+using Microsoft.IdentityModel.Tokens;
+using StudentPlatformAPI.Data;
+using StudentPlatformAPI.Map;
+using StudentPlatformAPI.Models.Auth;
+using StudentPlatformAPI.Services;
+using StudentPlatformAPI.Settings;
 
 namespace StudentPlatformAPI
 {
@@ -31,17 +32,77 @@ namespace StudentPlatformAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            
+            services.AddControllers();
+
             // Add cors policy
             services.AddCors();
             
+            // Add Identity
             services.AddDbContext<StudentPlatformContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddControllers();
+            services.Configure<JwtSettings>(Configuration.GetSection("Jwt"));
+
+
+
+            services.AddIdentity<User, Role>()
+                .AddEntityFrameworkStores<StudentPlatformContext>()
+                .AddDefaultTokenProviders();
+
+            // Get from appsettings
+            var jwtSettings = Configuration.GetSection("Jwt").Get<JwtSettings>();
+
+            // Add auth
+            services
+                .AddAuthorization()
+                .AddAuthentication(options =>
+                {
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer(options =>
+                {
+                    options.RequireHttpsMetadata = false;
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidIssuer = jwtSettings.Issuer,
+                        ValidAudience = jwtSettings.Issuer,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret)),
+                        ClockSkew = TimeSpan.Zero
+                    };
+                });
+
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "StudentPlatformAPI", Version = "v1" });
+
+                //Enable auth for swagger
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = "JWT containing userid claim",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                });
+                var security =
+                    new OpenApiSecurityRequirement
+                    {
+                        {
+                            new OpenApiSecurityScheme
+                            {
+                                Reference = new OpenApiReference
+                                {
+                                    Id = "Bearer",
+                                    Type = ReferenceType.SecurityScheme
+                                },
+                                UnresolvedReference = true
+                            },
+                            new List<string>()
+                        }
+                    };
+                c.AddSecurityRequirement(security);
             });
             // Auto Mapper Configurations
             var mappingConfig = new MapperConfiguration(mc =>
@@ -52,7 +113,7 @@ namespace StudentPlatformAPI
             IMapper mapper = mappingConfig.CreateMapper();
             services.AddSingleton(mapper);
             // Add dependency injection
-            services.AddScoped<IStudentService, StudentService>();
+            services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<ITaskService, TaskService>();
             services.AddScoped<ICalendarEventService, CalendarEventService>();
 
@@ -76,6 +137,7 @@ namespace StudentPlatformAPI
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

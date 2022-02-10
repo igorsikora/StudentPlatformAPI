@@ -1,42 +1,32 @@
 ﻿using System;
 using System.Linq;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using StudentPlatformAPI.models;
-using StudentPlatformAPI.dto;
+using StudentPlatformAPI.Models;
+using StudentPlatformAPI.Models.Auth;
 
-namespace StudentPlatformAPI.data
+namespace StudentPlatformAPI.Data
 {
-    public class StudentPlatformContext : DbContext
+    public class StudentPlatformContext : IdentityDbContext<User, Role, Guid>
     {
         public StudentPlatformContext(DbContextOptions<StudentPlatformContext> options) : base(options)
         {
         }
 
-        public DbSet<Student> Students { get; set; }
         public DbSet<Task> Tasks { get; set; }
         public DbSet<CalendarEvent> CalendarEvents { get; set; }
-        public DbSet<Status> Statuses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Student>().ToTable("Student");
-            modelBuilder.Entity<Task>().ToTable("Task").HasOne(t => t.Student).WithMany(s => s.Tasks)
-                .HasForeignKey(t => t.StudentId);
+            base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<CalendarEvent>().ToTable("CalendarEvent").HasOne(t => t.Student).WithMany(s => s.CalendarEvents)
-                .HasForeignKey(t => t.StudentId);
+            modelBuilder.Entity<Task>().ToTable("Task").HasOne(t => t.User).WithMany(s => s.Tasks)
+                .HasForeignKey(t => t.UserId);
 
-            //Seed data with Statuses Enum
-            foreach (Statuses status in Enum.GetValues(typeof(Statuses)).Cast<Statuses>())
-            {
-                Status s = new Status()
-                {
-                    Id = status,
-                    Name = status.ToString()
-                };
+            modelBuilder.Entity<CalendarEvent>().ToTable("CalendarEvent").HasOne(t => t.User).WithMany(s => s.CalendarEvents)
+                .HasForeignKey(t => t.UserId);
 
-                modelBuilder.Entity<Status>().HasData(s);
-            }
         }
     }
 }

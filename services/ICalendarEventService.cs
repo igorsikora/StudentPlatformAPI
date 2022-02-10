@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using StudentPlatformAPI.dto;
+using StudentPlatformAPI.Dto;
 
-namespace StudentPlatformAPI.services
+namespace StudentPlatformAPI.Services
 {
     public interface ICalendarEventService
     {
-        public IEnumerable<CalendarEventDto> getMonthlyCalendarEvents(DateTime dateTime, int studentId);
-        public IEnumerable<CalendarEventDto> getWeeklyCalendarEvents(IEnumerable<DateTime> dates, int studentId);
+        public IEnumerable<CalendarEventDto> getMonthlyCalendarEvents(DateTime dateTime, Guid userId);
+        public IEnumerable<CalendarEventDto> getWeeklyCalendarEvents(IEnumerable<DateTime> dates, Guid userId);
 
-        public void updateCalendarEvent(CalendarEventDto dto);
-        public int createCalendarEvent(CalendarEventDto dto);
-        public void deleteCalendarEvent(int id);
+        public void updateCalendarEvent(CalendarEventDto dto, Guid userId);
+        public int createCalendarEvent(CalendarEventDto dto, Guid userId);
+        public void deleteCalendarEvent(int id, Guid userId);
 
     }
 }

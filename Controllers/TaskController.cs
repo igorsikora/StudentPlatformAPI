@@ -2,9 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using StudentPlatformAPI.dto;
-using StudentPlatformAPI.services;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.Tokens;
+using StudentPlatformAPI.Dto;
+using StudentPlatformAPI.Services;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -20,11 +22,13 @@ namespace StudentPlatformAPI.Controllers
             _service = service;
         }
 
-        [Route("tasks/{statusId}")]
+        [Route("{statusId}")]
         [HttpGet]
-        public IActionResult GetToDo(int statusId)
+        [Authorize]
+        public IActionResult Get(int statusId)
         {
-            return Ok(_service.getTasks(statusId));
+            var userId = new Guid(User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)?.Value!);
+            return Ok(_service.getTasks(statusId, (userId))); 
         }
         
 
@@ -34,7 +38,8 @@ namespace StudentPlatformAPI.Controllers
         {
             try
             {
-                _service.createTask(dto);
+                var userId = new Guid(User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)?.Value!);
+                _service.createTask(dto, userId);
                 return NoContent();
             }
             catch(Exception e)
@@ -49,7 +54,8 @@ namespace StudentPlatformAPI.Controllers
         {
             try
             {
-                _service.updateTask(dto);
+                var userId = new Guid(User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)?.Value!);
+                _service.updateTask(dto, userId);
                 return NoContent();
             }
             catch(Exception e)
@@ -64,7 +70,8 @@ namespace StudentPlatformAPI.Controllers
         {
             try
             {
-                _service.deleteTask(id);
+                var userId = new Guid(User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)?.Value!);
+                _service.deleteTask(id, userId);
                 return NoContent();
             }
             catch(Exception e)
@@ -79,7 +86,8 @@ namespace StudentPlatformAPI.Controllers
         {
             try
             {
-                _service.deleteTasks(tasks);
+                var userId = new Guid(User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)?.Value!);
+                _service.deleteTasks(tasks, userId);
                 return NoContent();
             }
             catch(Exception e)

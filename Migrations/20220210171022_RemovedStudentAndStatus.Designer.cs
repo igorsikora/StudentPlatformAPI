@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using StudentPlatformAPI.Data;
 
 namespace StudentPlatformAPI.Migrations
 {
     [DbContext(typeof(StudentPlatformContext))]
-    partial class StudentPlatformContextModelSnapshot : ModelSnapshot
+    [Migration("20220210171022_RemovedStudentAndStatus")]
+    partial class RemovedStudentAndStatus
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

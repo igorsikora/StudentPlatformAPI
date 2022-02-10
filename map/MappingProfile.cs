@@ -1,19 +1,23 @@
 ﻿using AutoMapper;
-using StudentPlatformAPI.dto;
-using StudentPlatformAPI.models;
+using StudentPlatformAPI.Dto;
+using StudentPlatformAPI.Models;
+using StudentPlatformAPI.Models.Auth;
 
-namespace StudentPlatformAPI.map
+namespace StudentPlatformAPI.Map
 {
     public class MappingProfile : Profile
     {
         public MappingProfile()
         {
-            CreateMap<Student, StudentDto>();
-            CreateMap<StudentDto, Student>();
             CreateMap<Task, TaskDto>();
             CreateMap<TaskDto, Task>();
             CreateMap<CalendarEvent, CalendarEventDto>();
             CreateMap<CalendarEventDto, CalendarEvent>();
+
+            CreateMap<User, UserDto>();
+            //Map for user register
+            CreateMap<UserSignUpDto, User>()
+                .ForMember(u => u.UserName, opt => opt.MapFrom(ur => ur.Email));
         } 
     }
 }
