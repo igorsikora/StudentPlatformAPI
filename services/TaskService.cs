@@ -37,12 +37,13 @@ namespace StudentPlatformAPI.Services
             _context.SaveChanges();
         }
 
-        public void createTask(TaskDto dto, Guid userId)
+        public int createTask(TaskDto dto, Guid userId)
         {
             Task task = _mapper.Map<Task>(dto);
             task.SetUserId(userId);
             _context.Tasks.Add(task);
             _context.SaveChanges();
+            return task.Id;
         }
 
         public void deleteTask(int id, Guid userId)

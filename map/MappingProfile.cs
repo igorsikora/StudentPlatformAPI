@@ -13,11 +13,8 @@ namespace StudentPlatformAPI.Map
             CreateMap<TaskDto, Task>();
             CreateMap<CalendarEvent, CalendarEventDto>();
             CreateMap<CalendarEventDto, CalendarEvent>();
-
             CreateMap<User, UserDto>();
-            //Map for user register
-            CreateMap<UserSignUpDto, User>()
-                .ForMember(u => u.UserName, opt => opt.MapFrom(ur => ur.Email));
+            CreateMap<UserSignUpDto, User>();
         } 
     }
 }

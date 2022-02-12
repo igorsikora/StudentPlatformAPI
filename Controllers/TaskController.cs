@@ -1,98 +1,118 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using StudentPlatformAPI.Dto;
+using StudentPlatformAPI.Models.Auth;
 using StudentPlatformAPI.Services;
+using Task = StudentPlatformAPI.Models.Task;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace StudentPlatformAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class TaskController : ControllerBase
     {
-        private ITaskService _service;
-        public TaskController(ITaskService service)
+        private readonly UserManager<User> _userManager;
+        private readonly ITaskService _service;
+
+        public TaskController(ITaskService service, UserManager<User> userManager)
         {
             _service = service;
+            _userManager = userManager;
         }
 
-        [Route("{statusId}")]
         [HttpGet]
-        [Authorize]
-        public IActionResult Get(int statusId)
+        [Route("{statusId}")]
+        [ProducesResponseType(typeof(IEnumerable<Task>), (int) HttpStatusCode.OK)]
+        public async Task<IActionResult> Get(int statusId)
         {
-            var userId = new Guid(User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)?.Value!);
-            return Ok(_service.getTasks(statusId, (userId))); 
+            var user = await _userManager.FindByIdAsync(User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)
+                ?.Value);
+            return Ok(_service.getTasks(statusId, user.Id));
         }
-        
+
 
         // POST api/<TaskController>
         [HttpPost]
-        public IActionResult Post([FromBody] TaskDto dto)
+        [ProducesResponseType(typeof(int),(int) HttpStatusCode.Created)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> Post([FromBody] TaskDto dto)
         {
             try
             {
-                var userId = new Guid(User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)?.Value!);
-                _service.createTask(dto, userId);
-                return NoContent();
+                var user = await _userManager.FindByIdAsync(User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)
+                    ?.Value);
+                return Created("", _service.createTask(dto, user.Id));
             }
-            catch(Exception e)
+            catch (Exception e)
             {
-                return BadRequest(e);
+                return BadRequest(e.Message);
             }
         }
 
         // PUT api/<TaskController>
         [HttpPut]
-        public IActionResult Put([FromBody]TaskDto dto)
+        [ProducesResponseType((int) HttpStatusCode.NoContent)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> Put([FromBody] TaskDto dto)
         {
             try
             {
-                var userId = new Guid(User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)?.Value!);
-                _service.updateTask(dto, userId);
+                var user = await _userManager.FindByIdAsync(User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)
+                    ?.Value);
+                _service.updateTask(dto, user.Id);
                 return NoContent();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
-                return BadRequest(e);
+                return BadRequest(e.Message);
             }
         }
 
         // DELETE api/<TaskController>/5
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        [ProducesResponseType((int) HttpStatusCode.NoContent)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> Delete(int id)
         {
             try
             {
-                var userId = new Guid(User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)?.Value!);
-                _service.deleteTask(id, userId);
+                var user = await _userManager.FindByIdAsync(User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)
+                    ?.Value);
+                _service.deleteTask(id, user.Id);
                 return NoContent();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
-                return BadRequest(e);
+                return BadRequest(e.Message);
             }
         }
 
         // DELETE api/<TaskController>
         [HttpDelete]
-        public IActionResult Delete(List<TaskDto> tasks)
+        [ProducesResponseType((int) HttpStatusCode.NoContent)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> Delete(List<TaskDto> tasks)
         {
             try
             {
-                var userId = new Guid(User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)?.Value!);
-                _service.deleteTasks(tasks, userId);
+                var user = await _userManager.FindByIdAsync(User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)
+                    ?.Value);
+                _service.deleteTasks(tasks, user.Id);
                 return NoContent();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
-                return BadRequest(e);
+                return BadRequest(e.Message);
             }
         }
     }
