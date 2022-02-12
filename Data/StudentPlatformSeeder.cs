@@ -9,14 +9,13 @@ namespace StudentPlatformAPI.Data
     public class StudentPlatformSeeder
     {
         public static void SeedData
-            (UserManager<User> userManager, StudentPlatformContext _context)
+            (UserManager<User> userManager, StudentPlatformContext context)
         {
-            _context.Database.EnsureCreated();
             SeedUsers(userManager);
-            SeedCalendarEvents(_context, userManager);
-            SeedTasks(_context, userManager);
+            SeedCalendarEvents(context, userManager);
+            SeedTasks(context, userManager);
 
-            _context.SaveChanges();
+            context.SaveChanges();
         }
 
         public static void SeedUsers
@@ -25,20 +24,44 @@ namespace StudentPlatformAPI.Data
             if (userManager.FindByNameAsync
                 ("test").Result == null)
             {
-                var user = new User();
-                user.Id = new Guid("138490B4-7843-4169-D631-08D9EE03FCD5");
-                user.UserName = "test";
-                user.Email = "test@test.pl";
-                user.FirstName = "Test";
-                user.LastName = "Testowsky";
+                var user = new User
+                {
+                    Id = new Guid("138490B4-7843-4169-D631-08D9EE03FCD5"),
+                    UserName = "test",
+                    Email = "test@test.pl",
+                    FirstName = "Test",
+                    LastName = "Testowsky"
+                };
 
                 var result = userManager.CreateAsync(user, "zaq1@WSX").Result;
+
+                user = new User
+                {
+                    Id = new Guid("138490B4-7843-4169-D631-08D9EE03FCD6"),
+                    UserName = "changeUserName",
+                    Email = "changeUserName@changeUserName.pl",
+                    FirstName = "Change",
+                    LastName = "UserName"
+                };
+
+                result = userManager.CreateAsync(user, "zaq1@WSX").Result;
+
+                user = new User
+                {
+                    Id = new Guid("138490B4-7843-4169-D631-08D9EE03FCD7"),
+                    UserName = "changePasswordUser",
+                    Email = "changePasswordUser@changePasswordUser.pl",
+                    FirstName = "Change",
+                    LastName = "PasswordUser"
+                };
+
+                result = userManager.CreateAsync(user, "zaq1@WSX").Result;
             }
         }
 
-        public static void SeedCalendarEvents(StudentPlatformContext _context, UserManager<User> userManager)
+        public static void SeedCalendarEvents(StudentPlatformContext context, UserManager<User> userManager)
         {
-            if (!_context.CalendarEvents.Any())
+            if (!context.CalendarEvents.Any())
             {
                 var seededUser = userManager.FindByNameAsync("test").Result;
                 CalendarEvent[] events =
@@ -60,13 +83,13 @@ namespace StudentPlatformAPI.Data
                         UserId = seededUser.Id
                     }
                 };
-                _context.CalendarEvents.AddRange(events);
+                context.CalendarEvents.AddRange(events);
             }
         }
 
-        public static void SeedTasks(StudentPlatformContext _context, UserManager<User> userManager)
+        public static void SeedTasks(StudentPlatformContext context, UserManager<User> userManager)
         {
-            if (!_context.Tasks.Any())
+            if (!context.Tasks.Any())
             {
                 var seededUser = userManager.FindByNameAsync("test").Result;
                 Task[] tasks =
@@ -74,17 +97,17 @@ namespace StudentPlatformAPI.Data
                     new()
                     {
                         Title = "test",
-                        StatusId = (int)Statuses.ToDo,
+                        StatusId = (int) Statuses.ToDo,
                         UserId = seededUser.Id
                     },
                     new()
                     {
                         Title = "test to be updated",
-                        StatusId = (int)Statuses.ToDo,
+                        StatusId = (int) Statuses.ToDo,
                         UserId = seededUser.Id
                     }
                 };
-                _context.Tasks.AddRange(tasks);
+                context.Tasks.AddRange(tasks);
             }
         }
     }
