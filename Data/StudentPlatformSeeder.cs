@@ -56,6 +56,17 @@ namespace StudentPlatformAPI.Data
                 };
 
                 result = userManager.CreateAsync(user, "zaq1@WSX").Result;
+                
+                user = new User
+                {
+                    Id = new Guid("138490B4-7843-4169-D631-08D9EE03FCD8"),
+                    UserName = "changeUserDetail",
+                    Email = "changeUserDetail@changeUserDetail.pl",
+                    FirstName = "Change",
+                    LastName = "UserDetail"
+                };
+
+                result = userManager.CreateAsync(user, "zaq1@WSX").Result;
             }
         }
 
@@ -78,8 +89,8 @@ namespace StudentPlatformAPI.Data
                     {
                         Title = "test to be updated",
                         Description = "test to be updated",
-                        StartDate = new DateTime(2022, 1, 1, 20, 30, 00),
-                        EndDate = new DateTime(2022, 1, 1, 21, 30, 00),
+                        StartDate = new DateTime(2022, 1, 2, 20, 30, 00),
+                        EndDate = new DateTime(2022, 1, 2, 21, 30, 00),
                         UserId = seededUser.Id
                     }
                 };
@@ -97,13 +108,13 @@ namespace StudentPlatformAPI.Data
                     new()
                     {
                         Title = "test",
-                        StatusId = (int) Statuses.ToDo,
+                        Status = Statuses.ToDo,
                         UserId = seededUser.Id
                     },
                     new()
                     {
                         Title = "test to be updated",
-                        StatusId = (int) Statuses.ToDo,
+                        Status = Statuses.ToDo,
                         UserId = seededUser.Id
                     }
                 };

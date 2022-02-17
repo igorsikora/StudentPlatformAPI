@@ -6,6 +6,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
+using System.Security.Cryptography.Xml;
 using System.Text;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -17,11 +20,13 @@ using StudentPlatformAPI.Map;
 using StudentPlatformAPI.Models.Auth;
 using StudentPlatformAPI.Services;
 using StudentPlatformAPI.Settings;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace StudentPlatformAPI
 {
     public class Startup
     {
+        readonly string _myAllowSpecificOrigins = "_myAllowSpecificOrigins";
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -35,9 +40,17 @@ namespace StudentPlatformAPI
             services.AddControllers();
 
             // Add cors policy
-            services.AddCors();
+            services.AddCors(options =>
+            {
+                options.AddPolicy(name: _myAllowSpecificOrigins,
+                    builder =>
+                    {
+                        builder.WithOrigins(Configuration.GetSection("CorsAllowedOrigins")["Ui"])
+                            .AllowAnyMethod().AllowAnyHeader();
+                    });
+            });
             
-            // Add Identity
+            // Add Database
             services.AddDbContext<StudentPlatformContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
@@ -78,32 +91,41 @@ namespace StudentPlatformAPI
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "StudentPlatformAPI", Version = "v1" });
 
+
                 //Enable auth for swagger
-                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-                {
-                    Description = "JWT containing userid claim",
-                    Name = "Authorization",
-                    In = ParameterLocation.Header,
-                    Type = SecuritySchemeType.ApiKey,
-                });
-                var security =
-                    new OpenApiSecurityRequirement
+                c.AddSecurityDefinition("Auth",
+                    new OpenApiSecurityScheme
                     {
+                        Name = "Authorization",
+                        Type = SecuritySchemeType.ApiKey,
+                        Description = "JWT containing userid guid claim",
+                        In = ParameterLocation.Header,
+                        BearerFormat = "JWT",
+                        Scheme = "Bearer"
+                    });
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement()
+                {
+                    {
+                        new OpenApiSecurityScheme()
                         {
-                            new OpenApiSecurityScheme
-                            {
-                                Reference = new OpenApiReference
-                                {
-                                    Id = "Bearer",
-                                    Type = ReferenceType.SecurityScheme
-                                },
-                                UnresolvedReference = true
-                            },
-                            new List<string>()
-                        }
-                    };
-                c.AddSecurityRequirement(security);
+                            Reference = new OpenApiReference() {Id = "Auth", Type = ReferenceType.SecurityScheme}
+                        },
+                        new List<string>()
+                    }
+                });
+
+                // Add Examples value
+                c.ExampleFilters();
+
+                // Add XML support
+                var filePath = Path.Combine(System.AppContext.BaseDirectory, "StudentPlatformAPI.xml");
+                c.IncludeXmlComments(filePath);
             });
+
+            //Enable Swagger example values
+            services.AddSwaggerExamplesFromAssemblies(Assembly.GetEntryAssembly());
+
             // Auto Mapper Configurations
             var mappingConfig = new MapperConfiguration(mc =>
             {
@@ -125,8 +147,9 @@ namespace StudentPlatformAPI
         {
             // Seed database
             StudentPlatformSeeder.SeedData(userManager, context);
+
             // Adding cors
-            app.UseCors(builder => builder.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
+            app.UseCors(_myAllowSpecificOrigins);
 
             if (env.IsDevelopment())
             {

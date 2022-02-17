@@ -10,11 +10,14 @@ namespace StudentPlatformAPI.Map
         public MappingProfile()
         {
             CreateMap<Task, TaskDto>();
+
+
             CreateMap<TaskDto, Task>();
             CreateMap<CalendarEvent, CalendarEventDto>();
             CreateMap<CalendarEventDto, CalendarEvent>();
             CreateMap<User, UserDto>();
             CreateMap<UserSignUpDto, User>();
-        } 
+            CreateMap<UserUpdateDto, User>();
+        }
     }
 }

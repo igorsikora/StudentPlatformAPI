@@ -6,12 +6,12 @@ namespace StudentPlatformAPI.Services
 {
     public interface ICalendarEventService
     {
-        public IEnumerable<CalendarEventDto> getMonthlyCalendarEvents(DateTime dateTime, Guid userId);
-        public IEnumerable<CalendarEventDto> getWeeklyCalendarEvents(IEnumerable<DateTime> dates, Guid userId);
+        public IEnumerable<CalendarEventDto> GetMonthlyCalendarEvents(DateTime dateTime, Guid userId);
+        public IEnumerable<CalendarEventDto> GetWeeklyCalendarEvents(IEnumerable<DateTime> dates, Guid userId);
 
-        public void updateCalendarEvent(CalendarEventDto dto, Guid userId);
-        public int createCalendarEvent(CalendarEventDto dto, Guid userId);
-        public void deleteCalendarEvent(int id, Guid userId);
+        public void UpdateCalendarEvent(CalendarEventDto dto, Guid userId);
+        public int CreateCalendarEvent(CalendarEventDto dto, Guid userId);
+        public void DeleteCalendarEvent(int id, Guid userId);
 
     }
 }

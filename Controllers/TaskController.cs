@@ -10,19 +10,23 @@ using Microsoft.AspNetCore.Mvc;
 using StudentPlatformAPI.Dto;
 using StudentPlatformAPI.Models.Auth;
 using StudentPlatformAPI.Services;
+using Swashbuckle.AspNetCore.Filters;
 using Task = StudentPlatformAPI.Models.Task;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace StudentPlatformAPI.Controllers
 {
+    /// <summary>
+    ///     CRUD for Tasks
+    /// </summary>
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class TaskController : ControllerBase
     {
-        private readonly UserManager<User> _userManager;
         private readonly ITaskService _service;
+        private readonly UserManager<User> _userManager;
 
         public TaskController(ITaskService service, UserManager<User> userManager)
         {
@@ -30,6 +34,11 @@ namespace StudentPlatformAPI.Controllers
             _userManager = userManager;
         }
 
+        /// <summary>
+        ///     Get Tasks with given statusId
+        /// </summary>
+        /// <param name="statusId" example="1"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("{statusId}")]
         [ProducesResponseType(typeof(IEnumerable<Task>), (int) HttpStatusCode.OK)]
@@ -37,13 +46,16 @@ namespace StudentPlatformAPI.Controllers
         {
             var user = await _userManager.FindByIdAsync(User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)
                 ?.Value);
-            return Ok(_service.getTasks(statusId, user.Id));
+            return Ok(_service.GetTasks(statusId, user.Id));
         }
 
-
-        // POST api/<TaskController>
+        /// <summary>
+        ///     Create new Task
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
         [HttpPost]
-        [ProducesResponseType(typeof(int),(int) HttpStatusCode.Created)]
+        [ProducesResponseType(typeof(int), (int) HttpStatusCode.Created)]
         [ProducesResponseType(typeof(string), (int) HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Post([FromBody] TaskDto dto)
         {
@@ -51,7 +63,7 @@ namespace StudentPlatformAPI.Controllers
             {
                 var user = await _userManager.FindByIdAsync(User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)
                     ?.Value);
-                return Created("", _service.createTask(dto, user.Id));
+                return Created("", _service.CreateTask(dto, user.Id));
             }
             catch (Exception e)
             {
@@ -59,7 +71,11 @@ namespace StudentPlatformAPI.Controllers
             }
         }
 
-        // PUT api/<TaskController>
+        /// <summary>
+        ///     Update Task
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
         [HttpPut]
         [ProducesResponseType((int) HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(string), (int) HttpStatusCode.BadRequest)]
@@ -69,7 +85,7 @@ namespace StudentPlatformAPI.Controllers
             {
                 var user = await _userManager.FindByIdAsync(User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)
                     ?.Value);
-                _service.updateTask(dto, user.Id);
+                _service.UpdateTask(dto, user.Id);
                 return NoContent();
             }
             catch (Exception e)
@@ -78,7 +94,11 @@ namespace StudentPlatformAPI.Controllers
             }
         }
 
-        // DELETE api/<TaskController>/5
+        /// <summary>
+        ///     Delete Task
+        /// </summary>
+        /// <param name="id" example="5"></param>
+        /// <returns></returns>
         [HttpDelete("{id}")]
         [ProducesResponseType((int) HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(string), (int) HttpStatusCode.BadRequest)]
@@ -88,7 +108,7 @@ namespace StudentPlatformAPI.Controllers
             {
                 var user = await _userManager.FindByIdAsync(User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)
                     ?.Value);
-                _service.deleteTask(id, user.Id);
+                _service.DeleteTask(id, user.Id);
                 return NoContent();
             }
             catch (Exception e)
@@ -97,7 +117,11 @@ namespace StudentPlatformAPI.Controllers
             }
         }
 
-        // DELETE api/<TaskController>
+        /// <summary>
+        ///     Delete list of Tasks
+        /// </summary>
+        /// <param name="tasks"></param>
+        /// <returns></returns>
         [HttpDelete]
         [ProducesResponseType((int) HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(string), (int) HttpStatusCode.BadRequest)]
@@ -107,7 +131,7 @@ namespace StudentPlatformAPI.Controllers
             {
                 var user = await _userManager.FindByIdAsync(User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)
                     ?.Value);
-                _service.deleteTasks(tasks, user.Id);
+                _service.DeleteTasks(tasks, user.Id);
                 return NoContent();
             }
             catch (Exception e)
@@ -115,5 +139,49 @@ namespace StudentPlatformAPI.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+
+        #region TaskDtoExample
+
+        public class TaskDtoExample : IExamplesProvider<TaskDto>
+        {
+            public TaskDto GetExamples()
+            {
+                return new TaskDto
+                {
+                    Id = 1,
+                    StatusId = 0,
+                    Title = "Task"
+                };
+            }
+        }
+
+        #endregion
+
+        #region TaskListDtoExample
+
+        public class TaskListDtoExample : IExamplesProvider<List<TaskDto>>
+        {
+            public List<TaskDto> GetExamples()
+            {
+                return new List<TaskDto>
+                {
+                    new()
+                    {
+                        Id = 1,
+                        StatusId = 0,
+                        Title = "Task"
+                    },
+                    new()
+                    {
+                        Id = 2,
+                        StatusId = 0,
+                        Title = "Task2"
+                    }
+                };
+            }
+        }
+
+        #endregion
     }
 }

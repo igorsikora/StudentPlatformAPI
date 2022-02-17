@@ -19,7 +19,7 @@ namespace StudentPlatformAPI.Services
             _mapper = mapper;
         }
 
-        public IEnumerable<CalendarEventDto> getMonthlyCalendarEvents(DateTime dateTime, Guid userId)
+        public IEnumerable<CalendarEventDto> GetMonthlyCalendarEvents(DateTime dateTime, Guid userId)
         {
             return _context.CalendarEvents.Where(ce => ce.StartDate.Month == dateTime.Month && ce.UserId == userId).Select(ce => new CalendarEventDto()
             {
@@ -28,10 +28,10 @@ namespace StudentPlatformAPI.Services
                 Id = ce.Id,
                 StartDate = ce.StartDate,
                 Title = ce.Title
-            }).ToList();
+            }).OrderBy(ce => ce.StartDate).ToList();
         }
 
-        public IEnumerable<CalendarEventDto> getWeeklyCalendarEvents(IEnumerable<DateTime> dates, Guid userId)
+        public IEnumerable<CalendarEventDto> GetWeeklyCalendarEvents(IEnumerable<DateTime> dates, Guid userId)
         {
             DateTime firstDate = new DateTime(dates.First().Year, dates.First().Month, dates.First().Day);
             DateTime lastDate = new DateTime(dates.Last().Year, dates.Last().Month, dates.Last().Day, 23, 59, 59); // end date as last possible time
@@ -42,10 +42,10 @@ namespace StudentPlatformAPI.Services
                 Id = ce.Id,
                 StartDate = ce.StartDate,
                 Title = ce.Title
-            }).ToList();
+            }).OrderBy(ce => ce.StartDate).ToList();
         }
 
-        public void updateCalendarEvent(CalendarEventDto dto, Guid userId)
+        public void UpdateCalendarEvent(CalendarEventDto dto, Guid userId)
         {
             var calendarEvent = _context.CalendarEvents.FirstOrDefault(ce => ce.Id == dto.Id && ce.UserId == userId);
             if(!string.IsNullOrEmpty(dto.Description)) calendarEvent.Description = dto.Description;
@@ -56,7 +56,7 @@ namespace StudentPlatformAPI.Services
             _context.SaveChanges();
         }
 
-        public int createCalendarEvent(CalendarEventDto dto, Guid userId)
+        public int CreateCalendarEvent(CalendarEventDto dto, Guid userId)
         {
             CalendarEvent calendarEvent = _mapper.Map<CalendarEvent>(dto);
             calendarEvent.SetUserId(userId);
@@ -65,7 +65,7 @@ namespace StudentPlatformAPI.Services
             return calendarEvent.Id;
         }
 
-        public void deleteCalendarEvent(int id, Guid userId)
+        public void DeleteCalendarEvent(int id, Guid userId)
         {
             var calendarEvent = _context.CalendarEvents.FirstOrDefault(ce => ce.Id == id && ce.UserId == userId);
 

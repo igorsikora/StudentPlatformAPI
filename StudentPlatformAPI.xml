@@ -1,0 +1,139 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>StudentPlatformAPI</name>
+    </assembly>
+    <members>
+        <member name="T:StudentPlatformAPI.Controllers.AuthController">
+            <summary>
+                Register user and authentication
+            </summary>
+        </member>
+        <member name="M:StudentPlatformAPI.Controllers.AuthController.SignUp(StudentPlatformAPI.Dto.UserSignUpDto)">
+            <summary>
+                Create new user
+            </summary>
+            <param name="dto"></param>
+            <returns></returns>
+        </member>
+        <member name="M:StudentPlatformAPI.Controllers.AuthController.SignIn(StudentPlatformAPI.Dto.UserLoginDto)">
+            <summary>
+                Authenticate
+            </summary>
+            <param name="dto"></param>
+            <returns></returns>
+        </member>
+        <member name="T:StudentPlatformAPI.Controllers.CalendarEventsController">
+            <summary>
+                CRUD for CalendarEvents
+            </summary>
+        </member>
+        <member name="M:StudentPlatformAPI.Controllers.CalendarEventsController.GetMonthlyEvents(System.DateTime)">
+            <summary>
+                Get all CalendarEvents from given month
+            </summary>
+            <param name="date" example="2022/01/15"></param>
+            <returns></returns>
+        </member>
+        <member name="M:StudentPlatformAPI.Controllers.CalendarEventsController.GetWeeklyCalendarEvents(System.Collections.Generic.IEnumerable{System.DateTime})">
+            <summary>
+                Get all CalendarEvents from given days
+            </summary>
+            <param name="day"></param>
+            <returns></returns>
+        </member>
+        <member name="M:StudentPlatformAPI.Controllers.CalendarEventsController.Post(StudentPlatformAPI.Dto.CalendarEventDto)">
+            <summary>
+                Create CalendarEvent
+            </summary>
+            <param name="dto"></param>
+            <returns></returns>
+        </member>
+        <member name="M:StudentPlatformAPI.Controllers.CalendarEventsController.Put(StudentPlatformAPI.Dto.CalendarEventDto)">
+            <summary>
+                Update CalendarEvent
+            </summary>
+            <param name="dto"></param>
+            <returns></returns>
+        </member>
+        <member name="M:StudentPlatformAPI.Controllers.CalendarEventsController.Delete(System.Int32)">
+            <summary>
+                Delete CalendarEvent
+            </summary>
+            <param name="id" example="5"></param>
+            <returns></returns>
+        </member>
+        <member name="T:StudentPlatformAPI.Controllers.TaskController">
+            <summary>
+                CRUD for Tasks
+            </summary>
+        </member>
+        <member name="M:StudentPlatformAPI.Controllers.TaskController.Get(System.Int32)">
+            <summary>
+                Get Tasks with given statusId
+            </summary>
+            <param name="statusId" example="1"></param>
+            <returns></returns>
+        </member>
+        <member name="M:StudentPlatformAPI.Controllers.TaskController.Post(StudentPlatformAPI.Dto.TaskDto)">
+            <summary>
+                Create new Task
+            </summary>
+            <param name="dto"></param>
+            <returns></returns>
+        </member>
+        <member name="M:StudentPlatformAPI.Controllers.TaskController.Put(StudentPlatformAPI.Dto.TaskDto)">
+            <summary>
+                Update Task
+            </summary>
+            <param name="dto"></param>
+            <returns></returns>
+        </member>
+        <member name="M:StudentPlatformAPI.Controllers.TaskController.Delete(System.Int32)">
+            <summary>
+                Delete Task
+            </summary>
+            <param name="id" example="5"></param>
+            <returns></returns>
+        </member>
+        <member name="M:StudentPlatformAPI.Controllers.TaskController.Delete(System.Collections.Generic.List{StudentPlatformAPI.Dto.TaskDto})">
+            <summary>
+                Delete list of Tasks
+            </summary>
+            <param name="tasks"></param>
+            <returns></returns>
+        </member>
+        <member name="T:StudentPlatformAPI.Controllers.UserController">
+            <summary>
+                Get and edit User info
+            </summary>
+        </member>
+        <member name="M:StudentPlatformAPI.Controllers.UserController.Get">
+            <summary>
+                Get User info
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:StudentPlatformAPI.Controllers.UserController.UpdateUserEmail(StudentPlatformAPI.Dto.UserUpdateDto)">
+            <summary>
+                Update User email
+            </summary>
+            <param name="dto"></param>
+            <returns></returns>
+        </member>
+        <member name="M:StudentPlatformAPI.Controllers.UserController.UpdateUserName(StudentPlatformAPI.Dto.UserUpdateDto)">
+            <summary>
+                Update User detail
+            </summary>
+            <param name="dto"></param>
+            <returns></returns>
+        </member>
+        <member name="M:StudentPlatformAPI.Controllers.UserController.UpdateUserPassword(StudentPlatformAPI.Dto.UserUpdateDto)">
+            <summary>
+                Update User password
+            </summary>
+            <param name="dto"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

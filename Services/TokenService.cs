@@ -10,10 +10,9 @@ using StudentPlatformAPI.Settings;
 
 namespace StudentPlatformAPI.Services
 {
-    public class TokenService: ITokenService
+    public class TokenService : ITokenService
     {
-        private const double EXPIRE_HOURS = 1.0;
-        private readonly  JwtSettings _jwtSettings;
+        private readonly JwtSettings _jwtSettings;
 
         public TokenService(IOptionsSnapshot<JwtSettings> jwtSettings)
         {
@@ -24,8 +23,8 @@ namespace StudentPlatformAPI.Services
         {
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, user.Id.ToString()),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new(ClaimTypes.Name, user.Id.ToString()),
+                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
 
@@ -36,12 +35,11 @@ namespace StudentPlatformAPI.Services
                 _jwtSettings.Issuer,
                 _jwtSettings.Issuer,
                 claims,
-                expires : expires,
-                signingCredentials : new SigningCredentials(authKey, SecurityAlgorithms.HmacSha256)
+                expires: expires,
+                signingCredentials: new SigningCredentials(authKey, SecurityAlgorithms.HmacSha256)
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
-
     }
 }

@@ -10,9 +10,13 @@ using Microsoft.AspNetCore.Mvc;
 using StudentPlatformAPI.Dto;
 using StudentPlatformAPI.Models.Auth;
 using StudentPlatformAPI.Services;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace StudentPlatformAPI.Controllers
 {
+    /// <summary>
+    ///     CRUD for CalendarEvents
+    /// </summary>
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
@@ -27,17 +31,22 @@ namespace StudentPlatformAPI.Controllers
             _userManager = userManager;
         }
 
+        /// <summary>
+        ///     Get all CalendarEvents from given month
+        /// </summary>
+        /// <param name="date" example="2022/01/15"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("MonthlyEvents")]
         [ProducesResponseType(typeof(IEnumerable<CalendarEventDto>), (int) HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int) HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> GetMonthlyEvents(DateTime date)
+        public async Task<IActionResult> GetMonthlyEvents([FromQuery] DateTime date)
         {
             try
             {
                 var user = await _userManager.FindByIdAsync(User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)
                     ?.Value);
-                return Ok(_service.getMonthlyCalendarEvents(date, user.Id));
+                return Ok(_service.GetMonthlyCalendarEvents(date, user.Id));
             }
             catch (Exception e)
             {
@@ -45,6 +54,11 @@ namespace StudentPlatformAPI.Controllers
             }
         }
 
+        /// <summary>
+        ///     Get all CalendarEvents from given days
+        /// </summary>
+        /// <param name="day"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("WeeklyEvents")]
         [ProducesResponseType(typeof(IEnumerable<CalendarEventDto>), (int) HttpStatusCode.OK)]
@@ -55,7 +69,7 @@ namespace StudentPlatformAPI.Controllers
             {
                 var user = await _userManager.FindByIdAsync(User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)
                     ?.Value);
-                return Ok(_service.getWeeklyCalendarEvents(day, user.Id));
+                return Ok(_service.GetWeeklyCalendarEvents(day, user.Id));
             }
             catch (Exception e)
             {
@@ -63,8 +77,11 @@ namespace StudentPlatformAPI.Controllers
             }
         }
 
-
-        // POST api/<CalendarEventsController>
+        /// <summary>
+        ///     Create CalendarEvent
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
         [HttpPost]
         [ProducesResponseType(typeof(int), (int) HttpStatusCode.Created)]
         [ProducesResponseType(typeof(string), (int) HttpStatusCode.BadRequest)]
@@ -74,7 +91,7 @@ namespace StudentPlatformAPI.Controllers
             {
                 var user = await _userManager.FindByIdAsync(User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)
                     ?.Value);
-                return Created("", _service.createCalendarEvent(dto, user.Id));
+                return Created("", _service.CreateCalendarEvent(dto, user.Id));
             }
             catch (Exception e)
             {
@@ -82,7 +99,11 @@ namespace StudentPlatformAPI.Controllers
             }
         }
 
-        // PUT api/<CalendarEventsController>/5
+        /// <summary>
+        ///     Update CalendarEvent
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
         [HttpPut]
         [ProducesResponseType((int) HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(string), (int) HttpStatusCode.BadRequest)]
@@ -92,7 +113,7 @@ namespace StudentPlatformAPI.Controllers
             {
                 var user = await _userManager.FindByIdAsync(User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)
                     ?.Value);
-                _service.updateCalendarEvent(dto, user.Id);
+                _service.UpdateCalendarEvent(dto, user.Id);
                 return NoContent();
             }
             catch (Exception e)
@@ -101,7 +122,11 @@ namespace StudentPlatformAPI.Controllers
             }
         }
 
-        // DELETE api/<CalendarEventsController>/5
+        /// <summary>
+        ///     Delete CalendarEvent
+        /// </summary>
+        /// <param name="id" example="5"></param>
+        /// <returns></returns>
         [HttpDelete("{id}")]
         [ProducesResponseType((int) HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(string), (int) HttpStatusCode.BadRequest)]
@@ -111,7 +136,7 @@ namespace StudentPlatformAPI.Controllers
             {
                 var user = await _userManager.FindByIdAsync(User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)
                     ?.Value);
-                _service.deleteCalendarEvent(id, user.Id);
+                _service.DeleteCalendarEvent(id, user.Id);
                 return NoContent();
             }
             catch (Exception e)
@@ -119,5 +144,25 @@ namespace StudentPlatformAPI.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+
+        #region CalendarEventDtoExample
+
+        public class CalendarEventDtoExample : IExamplesProvider<CalendarEventDto>
+        {
+            public CalendarEventDto GetExamples()
+            {
+                return new CalendarEventDto
+                {
+                    Id = 15,
+                    Title = "event",
+                    Description = "desc",
+                    EndDate = DateTime.Today,
+                    StartDate = DateTime.Today.AddHours(2)
+                };
+            }
+        }
+
+        #endregion
     }
 }

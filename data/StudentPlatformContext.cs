@@ -21,10 +21,14 @@ namespace StudentPlatformAPI.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Task>().ToTable("Task").HasOne(t => t.User).WithMany(s => s.Tasks)
+            modelBuilder.Entity<Task>().ToTable("Task")
+                .HasOne(t => t.User)
+                .WithMany(s => s.Tasks)
                 .HasForeignKey(t => t.UserId);
 
-            modelBuilder.Entity<CalendarEvent>().ToTable("CalendarEvent").HasOne(t => t.User).WithMany(s => s.CalendarEvents)
+            modelBuilder.Entity<CalendarEvent>().ToTable("CalendarEvent")
+                .HasOne(t => t.User)
+                .WithMany(s => s.CalendarEvents)
                 .HasForeignKey(t => t.UserId);
 
         }

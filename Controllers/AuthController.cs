@@ -1,17 +1,20 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Net;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using StudentPlatformAPI.Dto;
 using StudentPlatformAPI.Models.Auth;
 using StudentPlatformAPI.Services;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace StudentPlatformAPI.Controllers
 {
+    /// <summary>
+    ///     Register user and authentication
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class AuthController : ControllerBase
@@ -28,9 +31,14 @@ namespace StudentPlatformAPI.Controllers
             _tokenService = tokenService;
         }
 
+        /// <summary>
+        ///     Create new user
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
         [HttpPost("SignUp")]
         [ProducesResponseType((int) HttpStatusCode.Created)]
-        [ProducesResponseType(typeof(string), (int) HttpStatusCode.BadGateway)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.BadRequest)]
         public async Task<IActionResult> SignUp(UserSignUpDto dto)
         {
             var user = _mapper.Map<UserSignUpDto, User>(dto);
@@ -42,73 +50,14 @@ namespace StudentPlatformAPI.Controllers
             return BadRequest(userCreateResult.Errors.First().Description);
         }
 
-        [Authorize]
-        [HttpGet("Detail")]
-        [ProducesResponseType(typeof(UserDto), (int) HttpStatusCode.OK)]
-        [ProducesResponseType((int) HttpStatusCode.NotFound)]
-        public async Task<IActionResult> Get()
-        {
-            var user = await _userManager.FindByIdAsync(User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)
-                ?.Value);
-            if (user == null) return NotFound();
-            var userDto = _mapper.Map<User, UserDto>(user);
-
-            return Ok(userDto);
-        }
-
-
-        [Authorize]
-        [HttpPut("UpdateUserDetails")]
-        [ProducesResponseType((int) HttpStatusCode.NoContent)]
-        [ProducesResponseType(typeof(string), (int) HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> UpdateUserDetails(UserUpdateDto dto)
-        {
-            var user = await _userManager.FindByIdAsync(User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)
-                ?.Value);
-            user.FirstName = dto.FirstName;
-            user.LastName = dto.LastName;
-            var userUpdateResult = await _userManager.UpdateAsync(user);
-
-            if (userUpdateResult.Succeeded) return NoContent();
-
-            return BadRequest(userUpdateResult.Errors.First().Description);
-        }
-
-        [Authorize]
-        [HttpPut("UpdateUserEmail")]
-        [ProducesResponseType((int) HttpStatusCode.NoContent)]
-        [ProducesResponseType(typeof(string), (int) HttpStatusCode.BadGateway)]
-        public async Task<IActionResult> UpdateUserEmail(UserUpdateDto dto)
-        {
-            var user = await _userManager.FindByIdAsync(User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)
-                ?.Value);
-            var token = await _userManager.GenerateChangeEmailTokenAsync(user, dto.Email);
-            var userUpdateResult = await _userManager.ChangeEmailAsync(user, dto.Email, token);
-
-            if (userUpdateResult.Succeeded) return NoContent();
-
-            return BadRequest(userUpdateResult.Errors.First().Description);
-        }
-
-        [Authorize]
-        [HttpPut("UpdateUserPassword")]
-        [ProducesResponseType((int) HttpStatusCode.NoContent)]
-        [ProducesResponseType(typeof(string), (int) HttpStatusCode.BadGateway)]
-        public async Task<IActionResult> UpdateUserPassword(UserUpdateDto dto)
-        {
-            var user = await _userManager.FindByIdAsync(User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)
-                ?.Value);
-            var userUpdateResult = await _userManager.ChangePasswordAsync(user, dto.CurrentPassword, dto.NewPassword);
-
-            if (userUpdateResult.Succeeded) return NoContent();
-
-            return BadRequest(userUpdateResult.Errors.First().Description);
-        }
-
-
+        /// <summary>
+        ///     Authenticate
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
         [HttpPost("SignIn")]
         [ProducesResponseType(typeof(string), (int) HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(string), (int) HttpStatusCode.BadGateway)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.BadRequest)]
         public async Task<IActionResult> SignIn(UserLoginDto dto)
         {
             var user = _userManager.Users.SingleOrDefault(u => u.UserName == dto.UserName);
@@ -121,23 +70,39 @@ namespace StudentPlatformAPI.Controllers
             return BadRequest("Email or password incorrect.");
         }
 
-        [Authorize]
-        [HttpPut("UpdateUserName")]
-        [ProducesResponseType((int) HttpStatusCode.NoContent)]
-        [ProducesResponseType(typeof(string), (int) HttpStatusCode.BadGateway)]
-        public async Task<IActionResult> UpdateUserName(UserUpdateDto dto)
+        #region UserLoginDtoExample
+
+        public class UserLoginDtoExample : IExamplesProvider<UserLoginDto>
         {
-            var user = await _userManager.FindByIdAsync(User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)
-                ?.Value);
-            var userUpdateResult = await _userManager.SetUserNameAsync(user, dto.UserName);
-
-            if (userUpdateResult.Succeeded)
+            public UserLoginDto GetExamples()
             {
-                await _userManager.UpdateNormalizedUserNameAsync(user);
-                return NoContent();
+                return new UserLoginDto()
+                {
+                    UserName = "test",
+                    Password = "zaq1@WSX"
+                };
             }
-
-            return BadRequest(userUpdateResult.Errors.First().Description);
         }
+
+        #endregion
+
+        #region UserSignUpDto
+
+        public class UserSignUpDtoExample : IExamplesProvider<UserSignUpDto>
+        {
+            public UserSignUpDto GetExamples()
+            {
+                return new UserSignUpDto()
+                {
+                    UserName = "username",
+                    FirstName = "Swag",
+                    LastName = "Ger",
+                    Email = "Swagger@Swagger.pl",
+                    Password = "zaq1@WSX"
+                };
+            }
+        }
+
+        #endregion
     }
 }
