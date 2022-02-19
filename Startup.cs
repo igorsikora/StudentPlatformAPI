@@ -49,7 +49,11 @@ namespace StudentPlatformAPI
                             .AllowAnyMethod().AllowAnyHeader();
                     });
             });
-            
+            // Add Default Identity entities
+            services.AddIdentity<User, Role>()
+                .AddEntityFrameworkStores<StudentPlatformContext>()
+                .AddDefaultTokenProviders();
+
             // Add Database
             services.AddDbContext<StudentPlatformContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
@@ -58,9 +62,7 @@ namespace StudentPlatformAPI
 
 
 
-            services.AddIdentity<User, Role>()
-                .AddEntityFrameworkStores<StudentPlatformContext>()
-                .AddDefaultTokenProviders();
+
 
             // Get from appsettings
             var jwtSettings = Configuration.GetSection("Jwt").Get<JwtSettings>();

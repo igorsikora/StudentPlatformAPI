@@ -67,8 +67,7 @@ namespace StudentPlatformAPI.Controllers
         {
             try
             {
-                var user = await _userManager.FindByIdAsync(User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)
-                    ?.Value);
+                var user = await _userManager.FindByIdAsync(User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)?.Value);
                 return Ok(_service.GetWeeklyCalendarEvents(day, user.Id));
             }
             catch (Exception e)
